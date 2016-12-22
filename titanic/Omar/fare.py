@@ -1,6 +1,5 @@
 # From: https://www.kaggle.com/omarelgabry/titanic/a-journey-through-titanic
 
-import matplotlib.pyplot as plt
 import seaborn as sns
 from pandas import DataFrame
 

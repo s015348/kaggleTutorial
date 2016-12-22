@@ -3,10 +3,6 @@
 import pandas as pd
 import seaborn as sns
 
-def drop_columes(data, column_names=[]):
-    # drop unnecessary columns, these columns won't be useful in analysis and prediction
-    return data.drop(column_names, axis=1)
-
 def load_data():
     # get titanic & test csv files as a DataFrame
     titanic_df = pd.read_csv('../train.csv')

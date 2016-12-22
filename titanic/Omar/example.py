@@ -1,13 +1,9 @@
 # From: https://www.kaggle.com/omarelgabry/titanic/a-journey-through-titanic
 
 
-# pandas
+
 import pandas as pd
 from pandas import Series,DataFrame
-
-# numpy, matplotlib, seaborn
-import numpy as np
-import matplotlib.pyplot as plt
 import seaborn as sns
 
 # machine learning
@@ -17,60 +13,36 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 
+from drop import drop_useless
 from embarked import show_embarked
 from fare import show_fare
 from age import show_age
-from cabin import drop_cabin
 from family import show_family
-from sex import show_sex
-from pclass import show_pclass
-from utility import drop_columes, load_data, preview_data, set_print_style
+from sex import show_sex, create_person
+from pclass import show_pclass, create_sub_pclass
+from utility import load_data, preview_data, set_print_style
+from mock.mock import inplace
 
-
-
+# load data
 titanic_df, test_df = load_data()
 preview_data([titanic_df, test_df])
 
-titanic_df = drop_columes(titanic_df, ['PassengerId', 'Name', 'Ticket'])
-test_df = drop_columes(test_df, ['Name', 'Ticket'])
+# prepare data by split male & female and sub classes
+titanic_df, test_df = create_person(titanic_df, test_df)
+titanic_df, test_df = create_sub_pclass(titanic_df, test_df)
 
+# plot data
 set_print_style()
-
 show_embarked(titanic_df)
-
-# Either to consider Embarked column in predictions,
-# and remove "S" dummy variable, 
-# and leave "C" & "Q", since they seem to have a good rate for Survival.
-
-# OR, don't create dummy variables for Embarked column, just drop it, 
-# because logically, Embarked doesn't seem to be useful in prediction.
-
-embark_dummies_titanic  = pd.get_dummies(titanic_df['Embarked'])
-embark_dummies_titanic.drop(['S'], axis=1, inplace=True)
-
-embark_dummies_test  = pd.get_dummies(test_df['Embarked'])
-embark_dummies_test.drop(['S'], axis=1, inplace=True)
-
-titanic_df = titanic_df.join(embark_dummies_titanic)
-test_df    = test_df.join(embark_dummies_test)
-
-titanic_df.drop(['Embarked'], axis=1,inplace=True)
-test_df.drop(['Embarked'], axis=1,inplace=True)
-
-
 show_fare(titanic_df, test_df)
-
 show_age(titanic_df, test_df)
+show_family(titanic_df, test_df)
+show_sex(titanic_df, test_df)
+show_pclass(titanic_df, test_df)
+sns.plt.show()
 
-titanic_df, test_df = drop_cabin(titanic_df, test_df)
-
-titanic_df, test_df = show_family(titanic_df, test_df)
-
-titanic_df, test_df = show_sex(titanic_df, test_df)
-
-titanic_df, test_df = show_pclass(titanic_df, test_df)
-
-
+# drop useless columns, or take useful columns for training
+titanic_df, test_df = drop_useless(titanic_df, test_df)
 
 # define training and testing sets
 
