@@ -21,28 +21,29 @@ def random_forests(X_train, Y_train, X_test):
 
 def svm(X_train, Y_train, X_test):
     # Support Vector Machines
-     # svc = SVC()
-    # svc.fit(X_train, Y_train)
-    # Y_pred = svc.predict(X_test)
-    # svc.score(X_train, Y_train)
-    return 0
+    svc = SVC()
+    svc.fit(X_train, Y_train)
+    Y_pred = svc.predict(X_test)
+    score = svc.score(X_train, Y_train)
+    return score
 
 
 def knn(X_train, Y_train, X_test):
-    # knn = KNeighborsClassifier(n_neighbors = 3)
-    # knn.fit(X_train, Y_train)
-    # Y_pred = knn.predict(X_test)
-    # knn.score(X_train, Y_train)
-    return 0
+    # k-nearest neighbors algorithm
+    knn = KNeighborsClassifier(n_neighbors = 3)
+    knn.fit(X_train, Y_train)
+    Y_pred = knn.predict(X_test)
+    score = knn.score(X_train, Y_train)
+    return score
 
 
 def naive_bayes(X_train, Y_train, X_test):
     # Gaussian Naive Bayes
-    # gaussian = GaussianNB()
-    # gaussian.fit(X_train, Y_train)
-    # Y_pred = gaussian.predict(X_test)
-    # gaussian.score(X_train, Y_train)
-    return 0
+    gaussian = GaussianNB()
+    gaussian.fit(X_train, Y_train)
+    Y_pred = gaussian.predict(X_test)
+    score = gaussian.score(X_train, Y_train)
+    return score
 
 
 def logistic_regression(X_train, Y_train, X_test):

@@ -30,7 +30,7 @@ show_age(titanic_df, test_df)
 show_family(titanic_df, test_df)
 show_sex(titanic_df, test_df)
 show_pclass(titanic_df, test_df)
-sns.plt.show()
+#sns.plt.show()
 
 # drop useless columns, or take useful columns for training
 titanic_df, test_df = drop_useless(titanic_df, test_df)
