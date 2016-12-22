@@ -2,6 +2,15 @@
 
 import pandas as pd
 import seaborn as sns
+from pandas import Series,DataFrame
+
+
+def get_features_correlation(data, logreg):
+    # get Correlation Coefficient for each feature using Logistic Regression
+    coeff_df = DataFrame(data.columns.delete(0))
+    coeff_df.columns = ['Features']
+    coeff_df["Coefficient Estimate"] = pd.Series(logreg.coef_[0])
+    return coeff_df
 
 def load_data():
     # get titanic & test csv files as a DataFrame
