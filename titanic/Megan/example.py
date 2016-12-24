@@ -44,4 +44,4 @@ train = clean_data(train)
 
 print(train.head(10))
 
-sns.plt.show()
+#sns.plt.show()
