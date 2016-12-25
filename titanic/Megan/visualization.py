@@ -36,3 +36,14 @@ def show_title_by_sex(data):
 
 def show_surname_amount(surname_tf):
     print surname_tf['Surname'].value_counts()
+
+
+def show_fare_distribution(data):
+    # Visualize Fares among all others sharing their class and embarkment
+    fare = data.loc[(data['Pclass'] == 3) & (data['Embarked'] == 'S'), "Fare"]
+#     print fare[fare == 0]
+    print fare[fare <> 0].mean()
+    
+    fare[fare == 0] = fare[fare <> 0].mean()
+    print fare.mean()
+    sns.distplot(fare)
