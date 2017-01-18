@@ -11,7 +11,6 @@ from family import show_family
 from sex import show_sex, create_person
 from pclass import show_pclass, create_sub_pclass
 from utility import load_data, preview_data, set_print_style, get_features_correlation
-from mock.mock import inplace
 
 
 # load data
