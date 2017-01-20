@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import time, datetime
 import matplotlib.pyplot as plt
-from constants import IMAGE_SIZE, PATCH_SIZE, FEATURE_NUM, SEARCH_STEP
+from constants import DEV_MODE, DEV_TRAIN_LEN, IMAGE_SIZE, PATCH_SIZE, \
+                        FEATURE_NUM, SEARCH_STEP, EVALUATION_LEN, LOG_INTERVAL
 from utility import append_result, convert_matrix_to_array, get_one_image_in_matrix
 from visualization import plot_images                 
                     
@@ -26,12 +27,29 @@ def extract_patch(images, label, x_column, y_column):
 
 
 def evaluate_patch_error(label, label_predict, features):
-    error = 0.0
+    error = pd.DataFrame()
     for feature in features:
-        error = error + (label[feature] - label_predict[feature]) ** 2
+        error[feature] = label[feature] - label_predict[feature]
     
-    score = (error.median()) ** 0.5
-    return score
+#     print "Error over all features looks like:"
+#     print error.head(10)
+    
+    return error.stack().std()
+
+
+def find_optimal_range(label, features, label_predict, label_median, label_var):
+    result = np.empty((0, 2), float)
+    for r in np.arange(0, 3, 0.1):
+        label_temp = label_predict.copy(deep=True)
+        label_temp = replace_abnormal_prediction(label_temp, features, label_median, label_var, r=r)
+        score = evaluate_patch_error(label, label_temp, features)
+        result = np.append(result, np.array([[r, score]]), axis=0)
+    
+    #plot_re(result)
+    min_index = np.argmin(result, axis=0)[1]
+    optimal_r = result[min_index][0]
+    print("Got optimal r: %f" %(optimal_r))
+    return optimal_r
 
 
 def get_image_grid(image_matrix, x_center, y_center, size):
@@ -65,10 +83,7 @@ def get_patches(images, label, features_num):
     return patches
 
 
-def predict_one_image(images, image_index, patches, features, submission):
-    # Count running time
-    starttime = datetime.datetime.now() 
-    
+def predict_one_image(images, image_index, patches, features, submission, starttime):
     # as submission format is different with labels, 
     # create both format in submission and labels
     label_list = []
@@ -86,10 +101,23 @@ def predict_one_image(images, image_index, patches, features, submission):
         label_list.append([features[i * 2], result[max_index][0:1]])
         label_list.append([features[i * 2 + 1], result[max_index][1:2]])
 
-    # Count running time
-    endtime = datetime.datetime.now()
-    print("Predicted #%d image, spend %d seconds" %(image_id, (endtime - starttime).seconds))
-    return submission, dict(label_list)
+    if image_id%LOG_INTERVAL == 0:
+        # Only print log info for each 100 predictions
+        # Count running time
+        endtime = datetime.datetime.now()
+        print("Predicted #%d image, spend %d seconds" %(image_id, (endtime - starttime).seconds))
+        # update starttime for next counting
+        starttime = endtime
+    return submission, dict(label_list), starttime
+
+
+def replace_abnormal_prediction(label, features, median, var, r=1):
+    for feature in features:
+        start = int(median[feature] - var[feature] * r)
+        end = int(median[feature] + var[feature] * r)
+        label.loc[(label[feature].between(start, end)) == False, 
+                  feature] = median[feature]
+    return label 
 
 
 def scan_one_image(images, patch, i=0):
@@ -107,35 +135,67 @@ def scan_one_image(images, patch, i=0):
             search = search / np.linalg.norm(search)
             result = np.append(result, np.array([[x, y, np.correlate(patch, search)[0]]]), axis=0)
             #result.append([x, y, np.cov(np.asarray([patch, search]))[0][1]])
+#     size = int((result.size/3) ** 0.5)
+#     print "size is:"
+#     print size
+#     if size == (IMAGE_SIZE - PATCH_SIZE * 2)/SEARCH_STEP:
+#         result_plot = result[:, 2:3].reshape(size, size)
+#         print "maximum correlation is:"
+#         print result_plot.max()
+#         plt.figure(1)
+#         plt.imshow(result_plot, cmap='gray', interpolation='nearest')
+#         plt.show()
     return result
 
 
-def use_image_patches(train, test, label):
+def use_image_patches(train, test, label, label_median, label_var):
     # Get average values of patches located surround label points
     patches = get_patches(train, label, FEATURE_NUM)
     
     features = label.columns.values
-    submission = pd.DataFrame()
-    label_predict = pd.DataFrame()
     
     # Before predict test data, apply prediction on train and score
+    submission = pd.DataFrame()
+    label_predict = pd.DataFrame()
     print "Evaluating model..."
-    for i in range(train.as_matrix().shape[0]):
-        submission, label_dict = predict_one_image(train, i, patches, features, submission)
-        label_predict = label_predict.append(pd.DataFrame(label_dict))
+    timer_p = datetime.datetime.now()
+    if DEV_MODE:
+        eval_len = DEV_TRAIN_LEN
+    else:
+        eval_len = EVALUATION_LEN
+    train_evaluation = train.head(eval_len).copy(deep=True)
+    for i in range(eval_len):
+        submission, label_dict, timer_p = predict_one_image(train_evaluation, i, 
+                                            patches, features, submission, timer_p)
+        label_predict = label_predict.append(pd.DataFrame(label_dict), ignore_index=True)
+
+    if DEV_MODE:
+        print "Optimizing model..."
+        optimal_r = find_optimal_range(label, features, 
+                        label_predict, label_median, label_var)
+    else:
+        print "Filter prediction out of circle (median, variance) ..."
+        optimal_r = 0.5
+    label_predict = replace_abnormal_prediction(label_predict, features, 
+                                    label_median, label_var, r=optimal_r)
     plot_images(train, label_predict)
     
     score = evaluate_patch_error(label, label_predict, features)
+    print("Score evaluated by partial train data: %f" %(score))    
     
     # Make prediction by search grid with maximum correlation
+    submission = pd.DataFrame()
+    label_predict = pd.DataFrame()
     print "Predicting test data..."
-    for i in range(test.as_matrix().shape[0]):
-        submission, label_dict = predict_one_image(test, i, patches, features, submission)
+    timer_p = datetime.datetime.now() 
+    for i in range(test[0].count()):
+        submission, label_dict, timer_p = predict_one_image(test, i, 
+                                            patches, features, submission, timer_p)
         label_predict = label_predict.append(pd.DataFrame(label_dict))
-        
+    label_predict = replace_abnormal_prediction(label_predict, features, 
+                                    label_median, label_var, r=optimal_r)         
     # Plot images for manual check
     plot_images(test, label_predict)
-    #plt.show()
 
     print "Prediction in submission format looks like:"
     print submission

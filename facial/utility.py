@@ -1,14 +1,14 @@
 import numpy as np
 import pandas as pd
 import csv
-import time
-from constants import IMAGE_SIZE, PATCH_SIZE
+import time, datetime
+from constants import DEV_TRAIN_LEN, DEV_TEST_LEN, IMAGE_SIZE, PATCH_SIZE
 
 
 def append_result(dataframe, image_id, feature_name, location, max_index):
     data = pd.DataFrame({'ImageId':image_id, 'FeatureName':feature_name, 
                          'Location':location, 'Max_index':max_index})
-    dataframe = dataframe.append(data)
+    dataframe = dataframe.append(data, ignore_index=True)
     return dataframe
 
 
@@ -47,6 +47,11 @@ def get_image_data(data):
     return data['Image'].str.split(' ').apply(pd.Series).astype(int)
 
 
+def get_label_args(label):
+    return label.min(axis=0), label.max(axis=0), \
+            label.median(axis=0), label.var(axis=0)
+    
+    
 def get_one_image_in_matrix(images, size, i=0):
     if len(images.shape) == 2:
         image_matrix = images.as_matrix()[i].reshape((size, size))
@@ -59,6 +64,11 @@ def get_one_image_in_matrix(images, size, i=0):
 
 
 def load_data(dev_mode = False):
+    print "Loading data..."
+    
+    # Count running time
+    starttime = datetime.datetime.now() 
+
     # get facial key csv files as DataFrames
     # columns are:
     data_type = {'left_eye_center_x': np.float32, 'left_eye_center_y': np.float32, \
@@ -78,13 +88,30 @@ def load_data(dev_mode = False):
                  'mouth_center_bottom_lip_y': np.float32, 'Image': np.str \
                  }
     train = pd.read_csv('./training.csv', dtype = data_type)
+    # Count running time
+    endtime = datetime.datetime.now()
+    print("Training data loaded, spend %d seconds" %(endtime - starttime).seconds)
+    starttime = endtime
+
     test = pd.read_csv('./test.csv', dtype=np.str)
+    # Count running time
+    endtime = datetime.datetime.now()
+    print("Testing data loaded, spend %d seconds" %(endtime - starttime).seconds)
+    starttime = endtime
+
     if dev_mode:
-        train = train.head(100)
-        test = test.head(10)
+        print("In Dev mode, only use %d train images and %d test images" %(DEV_TRAIN_LEN, DEV_TEST_LEN))
+        train = train.head(DEV_TRAIN_LEN)
+        test = test.head(DEV_TEST_LEN)
+
+    print "Parsing data..."
     label = train.drop('Image', axis=1, inplace=False)
     train = get_image_data(train)
     test = get_image_data(test)
+
+    # Count running time
+    endtime = datetime.datetime.now()
+    print("Data parsed, spend %d seconds" %(endtime - starttime).seconds)
     return train, test, label
 
 

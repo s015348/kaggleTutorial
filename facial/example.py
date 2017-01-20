@@ -2,8 +2,8 @@ import time, datetime
 import matplotlib.pyplot as plt
 from constants import DEV_MODE
 from use_patch import use_image_patches
-from utility import clean_data, data_preview, load_data, save_result
-from visualization import plot_images
+from utility import clean_data, data_preview, get_label_args, load_data, save_result
+from visualization import plot_images, plot_label_distribution
 
 
 # Count running time
@@ -17,13 +17,16 @@ plot_images(train, label)
 # Fill NA with average.
 # TODO: remove abnormal samples
 label = clean_data(label)
+label_min, label_max, label_median, label_var = get_label_args(label)
+plot_label_distribution(label)
 
 # Train and predict
-submission, score = use_image_patches(train, test, label)
-plt.show()
+submission, score = use_image_patches(train, test, label, label_median, label_var)
 
 save_result(submission)
 
 # Count running time
 endtime = datetime.datetime.now()
 print("Image patch correlation score: %f, spend %d seconds" %(score, (endtime - starttime).seconds))
+
+plt.show()
