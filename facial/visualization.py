@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib.pyplot as plt
 from constants import IMAGE_SIZE
 from utility import get_one_image_in_matrix
@@ -30,3 +31,20 @@ def plot_label_distribution(label):
         # next feature to next subplot
         index = index + 1
     #plt.show()
+    
+
+def plot_learning_curves(NeuralNet):
+    train_loss = np.array([i["train_loss"] for i in NeuralNet.train_history_])
+    valid_loss = np.array([i["valid_loss"] for i in NeuralNet.train_history_])
+    y_min = np.asarray([train_loss, valid_loss]).min() #1e-3
+    y_max = np.asarray([train_loss, valid_loss]).max() #1e-0
+
+    plt.figure()
+    plt.plot(train_loss, linewidth=3, label="Train loss")
+    plt.plot(valid_loss, linewidth=3, label="Valid loss")
+    plt.grid()
+    plt.legend()
+    plt.ylim(y_min, y_max)
+    plt.yscale("log")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")

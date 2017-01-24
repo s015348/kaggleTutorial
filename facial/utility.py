@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import csv
 import time, datetime
-from constants import DEV_TRAIN_LEN, DEV_TEST_LEN, IMAGE_SIZE, PATCH_SIZE
+from constants import DEV_TRAIN_LEN, DEV_TEST_LEN, IMAGE_SIZE, GRAY_255, PATCH_SIZE
 
 
 def append_result(dataframe, image_id, feature_name, location, max_index):
@@ -21,6 +21,13 @@ def clean_data(data):
 
 def convert_matrix_to_array(matrix, size):
     return matrix.reshape(1, size)[0]
+
+
+def convert_dataframe_to_array(train, test, label):
+    train_array = train.as_matrix().astype(np.float32)
+    label_array = label.as_matrix().astype(np.float32)
+    test_array = test.as_matrix().astype(np.float32)
+    return train_array, label_array, test_array
 
 
 def data_preview(train, test, label):
@@ -134,9 +141,9 @@ def save_result(result):
                     .sort(["RowId"], ascending=True)\
                     [['RowId', 'ImageId', 'FeatureName', 'Location']]\
                     .apply(lambda x:x.fillna(0))\
-                    .astype({'RowId': np.int32, 'ImageId': np.int32, 
-                             'FeatureName': np.str, 'Location': np.float32})\
                     .set_index('RowId', inplace=False)
+#                     .astype({'RowId': np.int32, 'ImageId': np.int32, 
+#                              'FeatureName': np.str, 'Location': np.float32})\
     print "We guess the locations are:"
     print result.head(10)
     # Write your solution to a csv file with the name my_solution.csv
@@ -155,3 +162,14 @@ def save_result(result):
 #     X_test = scaler.transform(X_test)
 #     return X_train, X_test
 
+
+def scale_data(train, test, label):
+    train_array, label_array, test_array = convert_dataframe_to_array(train, test, label)
+    train_array = train_array / GRAY_255
+    label_array = (label_array - IMAGE_SIZE/2) / IMAGE_SIZE * 2
+    test_array = test_array / GRAY_255
+    print "\nData scaled as:"
+    print("    Train min,max: %.2f, %.2f"%(train_array.min(), train_array.max()))
+    print("    Label min,max: %.2f, %.2f"%(label_array.min(), label_array.max()))
+    print("    Test min,max: %.2f, %.2f\n"%(test_array.min(), test_array.max()))
+    return train_array, label_array, test_array
