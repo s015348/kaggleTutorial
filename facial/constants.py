@@ -1,5 +1,5 @@
 # Set Dev mode for using small samples
-DEV_MODE = True
+DEV_MODE = False
 DEV_TRAIN_LEN = 20
 DEV_TEST_LEN = 10
 
@@ -22,3 +22,7 @@ LOG_INTERVAL = 100
 # For saving neural net models
 SIMPLE_3LAYERS_FILENAME = 'simple_3-layers_model'
 LENET5_CNN_FILENAME = 'LeNet5_CNN_model'
+SIMPLE_3LAYERS_FILENAME_KERAS = 'simple_3-layers_model_keras.h5'
+LENET5_CNN_FILENAME_KERAS = 'LeNet5_CNN_model_keras.h5'
+SIMPLE_3LAYERS_VISUALIZATION_FILENAME = 'simple-layer-net-visualization.png'
+LENET5_CNN_VISUALIZATION_FILENAME = 'LeNet5-CNN-net-visualization.png'

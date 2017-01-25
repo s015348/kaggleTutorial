@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from constants import DEV_MODE, IMAGE_SIZE, SIMPLE_3LAYERS_FILENAME, LENET5_CNN_FILENAME
 from lasagne_neuralnet import NeuralNet1, NeuralNet2, load_model_if_exists, predict, plot_neural_net, reshape_data
 from utility import clean_data, data_preview, get_label_args, load_data, save_result, scale_data
-from visualization import plot_images, plot_label_distribution, plot_learning_curves
+from visualization import plot_images, plot_label_distribution, plot_lasagne_learning_curves
 
 
 # Count running time
@@ -34,7 +34,7 @@ NeuralNet1.fit(train_array, label_array)
 NeuralNet1.save_params_to(SIMPLE_3LAYERS_FILENAME)
 submission, prediction, score = predict(NeuralNet1, test_array, IMAGE_SIZE, label.columns.values)
 save_result(submission)
-plot_learning_curves(NeuralNet1)
+plot_lasagne_learning_curves(NeuralNet1)
 plot_images(test, prediction)
  
 # Count running time
@@ -49,7 +49,7 @@ NeuralNet2.fit(train_array, label_array)
 NeuralNet2.save_params_to(LENET5_CNN_FILENAME)
 submission, prediction, score = predict(NeuralNet2, test_array, IMAGE_SIZE, label.columns.values)
 save_result(submission)
-plot_learning_curves(NeuralNet2)
+plot_lasagne_learning_curves(NeuralNet2)
 # Warning: don't plot conv2 or conv3, that's slow
 plot_neural_net(NeuralNet2, layer='conv1')
 plot_images(test, prediction)
