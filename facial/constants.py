@@ -1,5 +1,5 @@
 # Set Dev mode for using small samples
-DEV_MODE = False
+DEV_MODE = True
 DEV_TRAIN_LEN = 20
 DEV_TEST_LEN = 10
 

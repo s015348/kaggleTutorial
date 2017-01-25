@@ -3,7 +3,7 @@
 import time, datetime
 import matplotlib.pyplot as plt
 from constants import DEV_MODE, IMAGE_SIZE, SIMPLE_3LAYERS_FILENAME, LENET5_CNN_FILENAME
-from neuralnet import NeuralNet1, NeuralNet2, load_model_if_exists, predict, plot_neural_net, reshape_data
+from lasagne_neuralnet import NeuralNet1, NeuralNet2, load_model_if_exists, predict, plot_neural_net, reshape_data
 from utility import clean_data, data_preview, get_label_args, load_data, save_result, scale_data
 from visualization import plot_images, plot_label_distribution, plot_learning_curves
 
