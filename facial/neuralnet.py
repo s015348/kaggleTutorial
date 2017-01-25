@@ -1,10 +1,13 @@
+import os
 import numpy as np
 import pandas as pd
 from lasagne import layers
 from lasagne.updates import nesterov_momentum
 from nolearn.lasagne import NeuralNet
+from nolearn.lasagne import visualize
 from constants import IMAGE_SIZE
 from utility import append_result
+
 
 NeuralNet1 = NeuralNet(
     layers=[  # three layers: one hidden layer
@@ -24,7 +27,7 @@ NeuralNet1 = NeuralNet(
     update_momentum=0.9,
 
     regression=True,  # flag to indicate we're dealing with regression problem
-    max_epochs=20,  # we want to train this many epochs
+    max_epochs=50,  # we want to train this many epochs
     verbose=1,
     )
 
@@ -52,7 +55,7 @@ NeuralNet2 = NeuralNet(
     update_momentum=0.9,
 
     regression=True,
-    max_epochs=20,
+    max_epochs=5,
     verbose=1,
     )
 
@@ -68,21 +71,29 @@ def convert_to_submission_format(features, predict):
     return submission
 
 
-def predict(NeuralNet, data, image_size, features):
-    print data
-    print data.shape
-    # RMSE is sqrt of last 'valid_loss' with scale back to image size
-    last_valid_loss = NeuralNet.train_history_[-1]['valid_loss']
+def load_model_if_exists(neuralnet, filename):
+    if os.path.exists(filename):
+        neuralnet.load_params_from(filename)
+    return neuralnet
+
+
+def predict(neuralnet, data, image_size, features):
+     # RMSE is sqrt of last 'valid_loss' with scale back to image size
+    last_valid_loss = neuralnet.train_history_[-1]['valid_loss']
     score = np.sqrt(last_valid_loss) * image_size /2
     
     # Data has to be reshaped to 4 dimensions
-    predict = NeuralNet.predict(data)
+    predict = neuralnet.predict(data)
     predict = (predict + 1) * image_size / 2
     
     # Submission format is different to predict
     submission = convert_to_submission_format(features, predict)
     
     return submission, pd.DataFrame(predict, columns=features), score
+
+
+def plot_neural_net(neuralnet, layer='input'):
+    visualize.plot_conv_weights(neuralnet.layers_[layer])
 
 
 def reshape_data(train, test, image_size):

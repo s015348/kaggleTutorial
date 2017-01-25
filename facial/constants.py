@@ -1,5 +1,5 @@
 # Set Dev mode for using small samples
-DEV_MODE = True
+DEV_MODE = False
 DEV_TRAIN_LEN = 20
 DEV_TEST_LEN = 10
 
@@ -19,3 +19,6 @@ SEARCH_STEP = 2
 EVALUATION_LEN = 200
 # Output timer counting per 100 images
 LOG_INTERVAL = 100
+# For saving neural net models
+SIMPLE_3LAYERS_FILENAME = 'simple_3-layers_model'
+LENET5_CNN_FILENAME = 'LeNet5_CNN_model'

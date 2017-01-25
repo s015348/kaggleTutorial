@@ -2,8 +2,8 @@
 
 import time, datetime
 import matplotlib.pyplot as plt
-from constants import DEV_MODE, IMAGE_SIZE
-from neuralnet import NeuralNet1, NeuralNet2, predict, reshape_data
+from constants import DEV_MODE, IMAGE_SIZE, SIMPLE_3LAYERS_FILENAME, LENET5_CNN_FILENAME
+from neuralnet import NeuralNet1, NeuralNet2, load_model_if_exists, predict, plot_neural_net, reshape_data
 from utility import clean_data, data_preview, get_label_args, load_data, save_result, scale_data
 from visualization import plot_images, plot_label_distribution, plot_learning_curves
 
@@ -29,7 +29,9 @@ train_array, label_array, test_array = scale_data(train, test, label)
 
 # Simple 3-layers neural nets
 print "\n[Simple 3-layers neural nets]\n"
+NeuralNet1 = load_model_if_exists(NeuralNet1, SIMPLE_3LAYERS_FILENAME)
 NeuralNet1.fit(train_array, label_array)
+NeuralNet1.save_params_to(SIMPLE_3LAYERS_FILENAME)
 submission, prediction, score = predict(NeuralNet1, test_array, IMAGE_SIZE, label.columns.values)
 save_result(submission)
 plot_learning_curves(NeuralNet1)
@@ -41,11 +43,15 @@ print("Simple 3-layers neural nets score: %f, spend %d seconds" %(score, (endtim
 
 # LeNet5-style convolutional neural nets
 print "\n[LeNet5-style convolutional neural nets]\n"
-train_array, test_array2 = reshape_data(train_array, test_array, IMAGE_SIZE)
+train_array, test_array = reshape_data(train_array, test_array, IMAGE_SIZE)
+NeuralNet2 = load_model_if_exists(NeuralNet2, LENET5_CNN_FILENAME)
 NeuralNet2.fit(train_array, label_array)
-submission, prediction, score = predict(NeuralNet2, test_array2, IMAGE_SIZE, label.columns.values)
+NeuralNet2.save_params_to(LENET5_CNN_FILENAME)
+submission, prediction, score = predict(NeuralNet2, test_array, IMAGE_SIZE, label.columns.values)
 save_result(submission)
 plot_learning_curves(NeuralNet2)
+# Warning: don't plot conv2 or conv3, that's slow
+plot_neural_net(NeuralNet2, layer='conv1')
 plot_images(test, prediction)
 
 # Count running time

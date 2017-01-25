@@ -33,9 +33,9 @@ def plot_label_distribution(label):
     #plt.show()
     
 
-def plot_learning_curves(NeuralNet):
-    train_loss = np.array([i["train_loss"] for i in NeuralNet.train_history_])
-    valid_loss = np.array([i["valid_loss"] for i in NeuralNet.train_history_])
+def plot_learning_curves(neuralnet):
+    train_loss = np.array([i["train_loss"] for i in neuralnet.train_history_])
+    valid_loss = np.array([i["valid_loss"] for i in neuralnet.train_history_])
     y_min = np.asarray([train_loss, valid_loss]).min() #1e-3
     y_max = np.asarray([train_loss, valid_loss]).max() #1e-0
 
