@@ -5,6 +5,9 @@ from use_patch import use_image_patches
 from utility import clean_data, data_preview, get_label_args, load_data, save_result
 from visualization import plot_images, plot_label_distribution
 
+import matplotlib
+# Force matplotlib to not use any Xwindows backend.
+matplotlib.use('Agg')
 
 # Count running time
 starttime = datetime.datetime.now() 
