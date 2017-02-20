@@ -5,7 +5,7 @@ from keras.models import Sequential, load_model
 from keras.layers import Dense, Activation, Convolution2D, MaxPooling2D, Flatten
 from keras.optimizers import SGD
 from keras.utils.visualize_util import plot
-from constants import IMAGE_SIZE
+from constants import KERAS_BACKEND, IMAGE_SIZE
 from utility import append_result
 
 
@@ -15,7 +15,7 @@ def neuralnet1(imput_dim):
     neuralnet.add(Activation('relu'))
     neuralnet.add(Dense(30))
     neuralnet.compile(loss='mean_squared_error', 
-                      optimizer=SGD(lr='0.01', momentum=0.9, nesterov=True))
+                      optimizer=SGD(lr=0.01, momentum=0.9, nesterov=True))
     return neuralnet
 
 
@@ -42,12 +42,18 @@ def neuralnet2(input_shape):
     neuralnet.add(Dense(30))
     
     neuralnet.compile(loss='mean_squared_error', 
-                      optimizer=SGD(lr='0.01', momentum=0.9, nesterov=True))
+                      optimizer=SGD(lr=0.01, momentum=0.9, nesterov=True))
     return neuralnet
 
 
+if KERAS_BACKEND == 'th':
+    input_shape = (1, IMAGE_SIZE, IMAGE_SIZE)
+elif KERAS_BACKEND == 'tf':
+    input_shape = (IMAGE_SIZE, IMAGE_SIZE, 1)
+else:
+    print("ERROR: please check constant KERAS_BACKEND which should be either th or tf")
 NeuralNet1 = neuralnet1(IMAGE_SIZE ** 2)
-NeuralNet2 = neuralnet2((1, IMAGE_SIZE, IMAGE_SIZE))
+NeuralNet2 = neuralnet2(input_shape)
 
 
 def convert_to_submission_format(features, predict):
@@ -87,6 +93,12 @@ def plot_neural_net(neuralnet, filename='net-visualzation.png'):
 
 
 def reshape_data(train, test, image_size):
-    train = train.reshape(-1, 1, image_size, image_size)
-    test = test.reshape(-1, 1, image_size, image_size)
+    if KERAS_BACKEND == 'th':
+        train = train.reshape(-1, 1, image_size, image_size)
+        test = test.reshape(-1, 1, image_size, image_size)
+    elif KERAS_BACKEND == 'tf':
+        train = train.reshape(-1, image_size, image_size, 1)
+        test = test.reshape(-1, image_size, image_size, 1)
+    else:
+        print("ERROR: please check constant KERAS_BACKEND which should be either th or tf")    
     return train, test
