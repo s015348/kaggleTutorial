@@ -39,8 +39,9 @@ RUN pip install --upgrade pip && \
     pip install beautifulsoup4 pyparsing unicodecsv pbr cmd2 stevedore PyYAML PrettyTable && \
     pip install kaggle-cli && \
     pip install pygraphviz && \
-    pip install pydot pydot-ng
-
+    pip install pydot pydot-ng && \
+    pip install h5py
+    
 # Install theano
 RUN pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git && \
     pip install --upgrade six
