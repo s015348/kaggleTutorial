@@ -1,6 +1,9 @@
 # Ref: http://danielnouri.org/notes/2014/12/17/using-convolutional-neural-nets-to-detect-facial-keypoints-tutorial/
 
 import time, datetime
+import matplotlib
+# Force matplotlib to not use any Xwindows backend.
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from constants import DEV_MODE, IMAGE_SIZE, SIMPLE_3LAYERS_FILENAME, LENET5_CNN_FILENAME
 from lasagne_neuralnet import NeuralNet1, NeuralNet2, load_model_if_exists, predict, plot_neural_net, reshape_data

@@ -1,6 +1,9 @@
 # Ref: https://elix-tech.github.io/ja/2016/06/02/kaggle-facial-keypoints-ja.html
 
 import time, datetime
+import matplotlib
+# Force matplotlib to not use any Xwindows backend.
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import keras
 from constants import DEV_MODE, IMAGE_SIZE, SIMPLE_3LAYERS_FILENAME_KERAS, \
