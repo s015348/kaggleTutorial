@@ -1,5 +1,5 @@
-# Start with keras:1.0
-FROM shiying/keras:1.0
+# Start with keras:1.1
+FROM shiying/keras:1.1
 
 MAINTAINER Ying <s015248@aliyun.com>
 
