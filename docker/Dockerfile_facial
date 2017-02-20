@@ -1,0 +1,11 @@
+# Start with keras:1.0
+FROM shiying/keras:1.0
+
+MAINTAINER Ying <s015248@aliyun.com>
+
+# Add bash scripts for downloading source codes and data of project facial
+COPY ./runTutorial.sh /runTutorial.sh
+RUN chmod +x /runTutorial.sh
+
+# Set default command
+CMD /bin/bash

@@ -1,0 +1,60 @@
+# Start with Ubuntu 16.04 64bit
+FROM ubuntu:16.04
+
+MAINTAINER Ying <s015248@aliyun.com>
+
+# Utilities, installed in 3 layers for avoiding download failure
+# Layer ONE
+RUN apt-get update && apt-get install -y \
+            curl \
+            git \
+            wget \
+            vim \
+            unzip \
+            build-essential \
+            gfortran \
+            liblapack-dev \
+            libopenblas-dev
+
+# Layer TWO
+RUN apt-get install -y \
+            graphviz \
+            libgraphviz-dev \
+            pkg-config \
+            python-dev \
+            python-pip \
+            python-lxml \
+            python-tk \
+            python-nose \
+            python-numpy
+
+# Layer THREE
+RUN pip install --upgrade pip && \
+    pip install pandas && \
+    pip install patsy && \
+    pip install scipy && \
+    pip install statsmodels && \
+    pip install scikit-learn scikit-image && \
+    pip install matplotlib && \
+    pip install beautifulsoup4 pyparsing unicodecsv pbr cmd2 stevedore PyYAML PrettyTable && \
+    pip install kaggle-cli && \
+    pip install pygraphviz && \
+    pip install pydot pydot-ng
+
+# Install theano
+RUN pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git && \
+    pip install --upgrade six
+
+# Install keras, lasagne and nolearn
+RUN pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip && \
+    pip install nolearn && \
+    pip install -U --pre keras
+
+# Set backend of keras as theano
+RUN mkdir ~/.keras && echo '{\n\
+    "image_dim_ordering": "th", \n\
+    "epsilon": 1e-07, \n\
+    "floatx": "float32", \n\
+    "backend": "theano"\n\
+}\n'\
+> ~/.keras/keras.json
