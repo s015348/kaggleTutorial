@@ -105,13 +105,13 @@ RUN mkdir ~/.keras && echo '{\n\
 > ~/.keras/keras.json
 
 # Config theano using GPU
-RUN echo '{\n\
-	[global] \n\
-	floatX = float32 \n\
-	device = cuda \n\ \n\
-	[lib] \n\
-	cnmem = 1 \n\
-}\n'\
+RUN echo '[global] \n\
+floatX = float32 \n\
+device = cuda \n\
+\n\
+[lib] \n\
+cnmem = 1 \n\
+\n'\
 > ~/.theanorc
 
 
