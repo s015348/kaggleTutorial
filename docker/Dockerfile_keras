@@ -1,8 +1,50 @@
 # Start with Ubuntu 16.04 64bit
 FROM ubuntu:16.04
 
-MAINTAINER Ying <s015248@aliyun.com>
+MAINTAINER Ying <s015348@aliyun.com>
 
+
+################ Install Nvdia-docker ################
+LABEL com.nvidia.volumes.needed="nvidia_driver"
+
+# Get GPG key
+RUN NVIDIA_GPGKEY_SUM=d1be581509378368edeec8c1eb2958702feedf3bc3d17011adbf24efacce4ab5 && \
+    NVIDIA_GPGKEY_FPR=ae09fe4bbd223a84b2ccfce3f60f4b3d7fa2af80 && \
+    apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub && \
+    apt-key adv --export --no-emit-version -a $NVIDIA_GPGKEY_FPR | tail -n +5 > cudasign.pub && \
+    echo "$NVIDIA_GPGKEY_SUM  cudasign.pub" | sha256sum -c --strict - && rm cudasign.pub && \
+    echo "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/cuda.list
+
+# Install CUDA 8.0
+ENV CUDA_VERSION 8.0.61
+LABEL com.nvidia.cuda.version="${CUDA_VERSION}"
+
+ENV CUDA_PKG_VERSION 8-0=$CUDA_VERSION-1
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        cuda-nvrtc-$CUDA_PKG_VERSION \
+        cuda-nvgraph-$CUDA_PKG_VERSION \
+        cuda-cusolver-$CUDA_PKG_VERSION \
+        cuda-cublas-8-0=8.0.61.1-1 \
+        cuda-cufft-$CUDA_PKG_VERSION \
+        cuda-curand-$CUDA_PKG_VERSION \
+        cuda-cusparse-$CUDA_PKG_VERSION \
+        cuda-npp-$CUDA_PKG_VERSION \
+        cuda-cudart-$CUDA_PKG_VERSION && \
+    ln -s cuda-8.0 /usr/local/cuda && \
+    rm -rf /var/lib/apt/lists/*
+
+# Config CUDA 8.0
+RUN echo "/usr/local/cuda/lib64" >> /etc/ld.so.conf.d/cuda.conf && \
+    ldconfig
+
+RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
+    echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+
+ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
+ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
+
+
+################ Install Utilities ################
 # Utilities, installed in 3 layers for avoiding download failure
 # Layer ONE
 RUN apt-get update && apt-get install -y \
@@ -41,7 +83,9 @@ RUN pip install --upgrade pip && \
     pip install pygraphviz && \
     pip install pydot pydot-ng && \
     pip install h5py
-    
+
+
+################ Install Theano and Keras ################
 # Install theano
 RUN pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git && \
     pip install --upgrade six
@@ -59,3 +103,25 @@ RUN mkdir ~/.keras && echo '{\n\
     "backend": "theano"\n\
 }\n'\
 > ~/.keras/keras.json
+
+# Config theano using GPU
+RUN echo '{\n\
+	[global] \n\
+	floatX = float32 \n\
+	device = cuda \n\ \n\
+	[lib] \n\
+	cnmem = 1 \n\
+}\n'\
+> ~/.theanorc
+
+
+
+# Docker commands
+#docker build -t shiying/keras:2.0 -f Dockerfile_keras .
+#docker build --no-cache=true -t shiying/keras:2.0 -f Dockerfile_keras .
+#docker login --username=shiying
+#docker push shiying/keras:2.0
+#docker run -it --name=keras shiying/keras:2.0 bash
+#docker rm -f $(docker ps -a -q)
+#docker rm -f $(docker ps -a | grep none | awk '{print $1 }')
+#docker images|grep none|awk '{print $3 }'|xargs docker rmi -f
