@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Split into 3 layers for avoiding download failure
 # Layer ONE
 RUN apt-get update && apt-get install -y \
-            curl git wget dvim \
+            curl git wget vim \
             bzip2 unzip \
             build-essential \
             gfortran \
@@ -52,19 +52,12 @@ RUN cd / && \
 	bash Anaconda2-4.4.0-Linux-x86_64.sh -b
 
 # Set path in .bashrc
-# Maybe better to be:
-# ENV PATH "/root/anaconda2/bin:$PATH"
-RUN echo '\n\
-# added by Anaconda2 4.4.0 installer \n\
-export PATH="/root/anaconda2/bin:$PATH" \n\
-\n'\
->> ~/.bashrc
+ENV PATH "/root/anaconda2/bin:$PATH"
 
 
 ################ Install Theano and Keras ################
 # Install theano
-RUN conda install libpython && \
-	conda install numpy scipy mkl nose sphinx pydot-ng && \
+RUN conda install numpy scipy mkl nose sphinx pydot-ng && \
 	conda install theano
 
 # Install tensorflow
