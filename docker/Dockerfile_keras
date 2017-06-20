@@ -1,77 +1,12 @@
 # Start with Ubuntu 16.04 64bit
-FROM ubuntu:16.04
+FROM nvidia/cuda:8.0-devel-ubuntu16.04
 
 MAINTAINER Ying <s015348@aliyun.com>
 
 
-################ Install Nvdia-docker ################
-LABEL com.nvidia.volumes.needed="nvidia_driver"
+################ Install cudnn6 ################
+# ref: https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/8.0/runtime/cudnn6/Dockerfile
 
-# Get GPG key
-RUN NVIDIA_GPGKEY_SUM=d1be581509378368edeec8c1eb2958702feedf3bc3d17011adbf24efacce4ab5 && \
-    NVIDIA_GPGKEY_FPR=ae09fe4bbd223a84b2ccfce3f60f4b3d7fa2af80 && \
-    apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub && \
-    apt-key adv --export --no-emit-version -a $NVIDIA_GPGKEY_FPR | tail -n +5 > cudasign.pub && \
-    echo "$NVIDIA_GPGKEY_SUM  cudasign.pub" | sha256sum -c --strict - && rm cudasign.pub && \
-    echo "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/cuda.list
-
-# Install CUDA 8.0
-ENV CUDA_VERSION 8.0.61
-LABEL com.nvidia.cuda.version="${CUDA_VERSION}"
-
-ENV CUDA_PKG_VERSION 8-0=$CUDA_VERSION-1
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        cuda-nvrtc-$CUDA_PKG_VERSION \
-        cuda-nvgraph-$CUDA_PKG_VERSION \
-        cuda-cusolver-$CUDA_PKG_VERSION \
-        cuda-cublas-8-0=8.0.61.1-1 \
-        cuda-cufft-$CUDA_PKG_VERSION \
-        cuda-curand-$CUDA_PKG_VERSION \
-        cuda-cusparse-$CUDA_PKG_VERSION \
-        cuda-npp-$CUDA_PKG_VERSION \
-        cuda-cudart-$CUDA_PKG_VERSION && \
-    ln -s cuda-8.0 /usr/local/cuda && \
-    rm -rf /var/lib/apt/lists/*
-
-# Config CUDA 8.0
-RUN echo "/usr/local/cuda/lib64" >> /etc/ld.so.conf.d/cuda.conf && \
-    ldconfig
-
-RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
-    echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
-
-ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
-ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
-
-# 安装cmake
-cd ~
-wget https://cmake.org/files/v3.9/cmake-3.9.0-rc3.tar.gz
-tar xzvf cmake-3.9.0-rc3.tar.gz
-cd cmake-3.9.0-rc3
-./bootstrap
-make install
-cmake --version
-
-#安装libgpuarray
-cd ~
-git clone https://github.com/Theano/libgpuarray.git
-cd libgpuarray
-mkdir Build
-cd Build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make
-make install
-cd ..
-
-# 安装pygpu，第二遍一定会成功
-pip install Cython
-python setup.py build
-python setup.py install
-
-export LD_LIBRARY_PATH=/usr/local/lib
-ldconfig
-
-# 安装cudnn6
 RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
 
 ENV CUDNN_VERSION 6.0.21
@@ -82,15 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 
-################ Install Utilities ################
-# Utilities, installed in 3 layers for avoiding download failure
+################ Install Anaconda ################
+# Split into 3 layers for avoiding download failure
 # Layer ONE
 RUN apt-get update && apt-get install -y \
-            curl \
-            git \
-            wget \
-            vim \
-            unzip \
+            curl git wget dvim \
+            bzip2 unzip \
             build-essential \
             gfortran \
             liblapack-dev \
@@ -102,43 +34,46 @@ RUN apt-get install -y \
             libgraphviz-dev \
             pkg-config \
             python-dev \
-            python-pip \
-			python-virtualenv \
+            python-h5py \
             python-lxml \
-            python-tk \
-		    python-h5py \
-			python-yaml \
-			python-pydot \
             python-nose \
-			python-scipy \
-            python-numpy
+            python-numpy \
+            python-pip \
+            python-pydot \
+            python-scipy \
+            python-tk \
+            python-yaml \
+            python-virtualenv
 
 # Layer THREE
-RUN pip install --upgrade pip && \
-    pip install pandas && \
-    pip install patsy && \
-    pip install scipy && \
-    pip install statsmodels && \
-    pip install scikit-learn scikit-image && \
-    pip install matplotlib && \
-    pip install beautifulsoup4 pyparsing unicodecsv pbr cmd2 stevedore PyYAML PrettyTable && \
-    pip install kaggle-cli && \
-    pip install pygraphviz && \
-    pip install pydot pydot-ng && \
-    pip install h5py
+RUN cd / && \
+	wget https://repo.continuum.io/archive/Anaconda2-4.4.0-Linux-x86_64.sh && \
+	md5sum Anaconda2-4.4.0-Linux-x86_64.sh && \
+	bash Anaconda2-4.4.0-Linux-x86_64.sh -b
+
+# Set path in .bashrc
+# Maybe better to be:
+# ENV PATH "/root/anaconda2/bin:$PATH"
+RUN echo '\n\
+# added by Anaconda2 4.4.0 installer \n\
+export PATH="/root/anaconda2/bin:$PATH" \n\
+\n'\
+>> ~/.bashrc
 
 
 ################ Install Theano and Keras ################
 # Install theano
-# ENV THEANO_FLAGS='device=gpu,floatX=float32,nvcc.fastmath=True,lib.cnmem=1'
-RUN pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git && \
-    pip install --upgrade six
+RUN conda install libpython && \
+	conda install numpy scipy mkl nose sphinx pydot-ng && \
+	conda install theano
+
+# Install tensorflow
+RUN conda install tensorflow
 
 # Install keras, lasagne and nolearn
-# ENV KERAS_BACKEND=theano
 RUN pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip && \
     pip install nolearn && \
-    pip install -U --pre keras
+    conda install keras
 
 # Set backend of keras as theano
 RUN mkdir ~/.keras && echo '{\n\
@@ -156,6 +91,13 @@ device = cuda \n\
 \n\
 [lib] \n\
 cnmem = 1 \n\
+\n\
+[cuda] \n\
+root = /usr/local/cuda \n\
+\n\
+[dnn] \n\
+library_path = /usr/local/cuda/lib64 \n\
+include_path = /usr/local/cuda/include \n\
 \n'\
 > ~/.theanorc
 
