@@ -43,6 +43,44 @@ RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
 ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
 ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
 
+# 安装cmake
+cd ~
+wget https://cmake.org/files/v3.9/cmake-3.9.0-rc3.tar.gz
+tar xzvf cmake-3.9.0-rc3.tar.gz
+cd cmake-3.9.0-rc3
+./bootstrap
+make install
+cmake --version
+
+#安装libgpuarray
+cd ~
+git clone https://github.com/Theano/libgpuarray.git
+cd libgpuarray
+mkdir Build
+cd Build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make
+make install
+cd ..
+
+# 安装pygpu，第二遍一定会成功
+pip install Cython
+python setup.py build
+python setup.py install
+
+export LD_LIBRARY_PATH=/usr/local/lib
+ldconfig
+
+# 安装cudnn6
+RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
+
+ENV CUDNN_VERSION 6.0.21
+LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+            libcudnn6=$CUDNN_VERSION-1+cuda8.0 && \
+    rm -rf /var/lib/apt/lists/*
+
 
 ################ Install Utilities ################
 # Utilities, installed in 3 layers for avoiding download failure
@@ -65,9 +103,14 @@ RUN apt-get install -y \
             pkg-config \
             python-dev \
             python-pip \
+			python-virtualenv \
             python-lxml \
             python-tk \
+		    python-h5py \
+			python-yaml \
+			python-pydot \
             python-nose \
+			python-scipy \
             python-numpy
 
 # Layer THREE
@@ -87,10 +130,12 @@ RUN pip install --upgrade pip && \
 
 ################ Install Theano and Keras ################
 # Install theano
+# ENV THEANO_FLAGS='device=gpu,floatX=float32,nvcc.fastmath=True,lib.cnmem=1'
 RUN pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git && \
     pip install --upgrade six
 
 # Install keras, lasagne and nolearn
+# ENV KERAS_BACKEND=theano
 RUN pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip && \
     pip install nolearn && \
     pip install -U --pre keras
