@@ -4,7 +4,8 @@ DEV_TRAIN_LEN = 20
 DEV_TEST_LEN = 10
 
 # Set Keras backend, as tensor shape differs when using Tensorflow or Theano
-KERAS_BACKEND = 'th'
+# KERAS_BACKEND = 'th'
+KERAS_BACKEND = 'tf'
 
 # Constants
 # Train data and test data are both in size of 96*96 pixels
