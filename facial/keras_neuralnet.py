@@ -22,7 +22,7 @@ def neuralnet1(imput_dim):
 def neuralnet2(input_shape):
     neuralnet = Sequential()
 
-    neuralnet.add(Convolution2D(32, (3, 3)), input_shape=input_shape)
+    neuralnet.add(Convolution2D(32, (3, 3), input_shape=input_shape))
     neuralnet.add(Activation('relu'))
     neuralnet.add(MaxPooling2D(pool_size=(2, 2)))
 
