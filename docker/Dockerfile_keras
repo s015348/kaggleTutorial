@@ -5,9 +5,10 @@ MAINTAINER Ying <s015348@aliyun.com>
 
 
 ################ Install cudnn5 ################
-# ref: https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/8.0/devel/cudnn5/Dockerfile
+# Ref: https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/8.0/devel/cudnn5/Dockerfile
+# cuda and cudnn are included in base image, but cudnn.h and libcudnn* are required for libgpuarray
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
 			curl git wget vim && \
 			CUDNN_TAR_FILE="cudnn-8.0-linux-x64-v5.1.tgz" && \
 			wget http://developer.download.nvidia.com/compute/redist/cudnn/v5.1/${CUDNN_TAR_FILE} && \
@@ -22,48 +23,69 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ################ Install Anaconda ################
 # Split into 3 layers for avoiding download failure
 # Layer ONE
+# Install utilities
 RUN apt-get update && apt-get install -y \
             curl git wget vim \
             bzip2 unzip \
             build-essential \
             gfortran \
             liblapack-dev \
-            libopenblas-dev
-
-# Layer TWO
-RUN apt-get install -y \
+            libopenblas-dev \
             graphviz \
             libgraphviz-dev \
             pkg-config \
             python-dev \
-            python-h5py \
             python-lxml \
-            python-nose \
-            python-numpy \
             python-pip \
             python-pydot \
-            python-scipy \
             python-tk \
             python-yaml \
-            python-virtualenv
+            && \
+	apt-get clean && \
+	apt-get autoremove && \
+	rm -rf /var/lib/apt/lists/*
+
+# Layer TWO
+# Order should be kept
+RUN apt-get update && apt-get install -y \
+            python-numpy \
+            python-scipy \
+            python-nose \
+            python-h5py \
+            python-skimage \
+            python-matplotlib \
+            python-pandas \
+            python-sklearn \
+            python-sympy \
+            && \
+    pip install kaggle-cli && \
+	apt-get clean && \
+	apt-get autoremove && \
+	rm -rf /var/lib/apt/lists/*
 
 # Layer THREE
+# Install Anaconda in silent mode
 RUN cd / && \
 	wget https://repo.continuum.io/archive/Anaconda2-4.4.0-Linux-x86_64.sh && \
 	md5sum Anaconda2-4.4.0-Linux-x86_64.sh && \
 	bash Anaconda2-4.4.0-Linux-x86_64.sh -b
 
-# Set path in .bashrc
+# Add Anaconda into path
 ENV PATH "/root/anaconda2/bin:$PATH"
 
 
 ################ Install Theano and Keras ################
-# Install theano 
+# Install theano
+# theano 0.9 from conda is compliant with cudnn5.1
+# If use cudnn6, bleeding theano 0.10 installation is required
+# Uninstall numpy via pip to avoid conflict with conda
+# mkl should be installed after theano
 RUN conda install numpy scipy mkl nose sphinx pydot-ng && \
+	conda install nomkl scikit-learn numexpr && \
 	conda install theano
 
 # Install tensorflow
-RUN conda install tensorflow
+RUN conda install -c anaconda tensorflow-gpu=1.1.0
 
 # Install keras, lasagne and nolearn
 RUN pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip && \
@@ -103,11 +125,11 @@ cnmem = 1 \n\
 
 
 # Docker commands
-#docker build -t shiying/keras:2.3 -f Dockerfile_keras .
-#docker build --no-cache=true -t shiying/keras:2.3 -f Dockerfile_keras .
+#docker build -t shiying/keras:2.4 -f Dockerfile_keras .
+#docker build --no-cache=true -t shiying/keras:2.4 -f Dockerfile_keras .
 #docker login --username=shiying
-#docker push shiying/keras:2.3
-#nvidia-docker run -it --name=keras shiying/keras:2.3 bash
+#docker push shiying/keras:2.4
+#nvidia-docker run -it --name=keras shiying/keras:2.4 bash
 #docker rm -f $(docker ps -a -q)
 #docker rm -f $(docker ps -a | grep none | awk '{print $1 }')
 #docker images|grep none|awk '{print $3 }'|xargs docker rmi -f
