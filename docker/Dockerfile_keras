@@ -4,23 +4,25 @@ FROM nvidia/cuda:8.0-devel-ubuntu16.04
 MAINTAINER Ying <s015348@aliyun.com>
 
 
-################ Install cudnn6 ################
-# ref: https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/8.0/runtime/cudnn6/Dockerfile
+################ Install cudnn5 ################
+# ref: https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/8.0/devel/cudnn5/Dockerfile
 
 RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
 
-ENV CUDNN_VERSION 6.0.21
+ENV CUDNN_VERSION 5.1.10
 LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
 			curl git wget vim \
-			libcudnn6=$CUDNN_VERSION-1+cuda8.0 && \
+            libcudnn5=$CUDNN_VERSION-1+cuda8.0 \
+            libcudnn5-dev=$CUDNN_VERSION-1+cuda8.0 && \
 			rm -rf /var/lib/apt/lists/* && \
-			CUDNN_TAR_FILE="cudnn-8.0-linux-x64-v6.0.tgz" && \
-			wget http://developer.download.nvidia.com/compute/redist/cudnn/v6.0/${CUDNN_TAR_FILE} && \
+			CUDNN_TAR_FILE="cudnn-8.0-linux-x64-v5.1.tgz" && \
+			wget http://developer.download.nvidia.com/compute/redist/cudnn/v5.1/${CUDNN_TAR_FILE} && \
 			tar -xzvf ${CUDNN_TAR_FILE} && \
 			cp -P cuda/include/cudnn.h /usr/local/cuda/include/cudnn.h && \
-			cp -P cuda/lib64/libcudnn* /usr/local/cuda/lib64/
+			cp -P cuda/lib64/libcudnn* /usr/local/cuda/lib64/ && \
+			ldconfig
 
 
 ################ Install Anaconda ################
@@ -63,10 +65,8 @@ ENV PATH "/root/anaconda2/bin:$PATH"
 
 ################ Install Theano and Keras ################
 # Install theano 
-# (must use upgrade because conda install 0.9, imcompatible with cuda)
 RUN conda install numpy scipy mkl nose sphinx pydot-ng && \
-	pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git && \
-	pip install --upgrade six
+	conda install theano
 
 # Install tensorflow
 RUN conda install tensorflow
@@ -105,11 +105,11 @@ include_path = /usr/local/cuda/include \n\
 
 
 # Docker commands
-#docker build -t shiying/keras:2.1 -f Dockerfile_keras .
-#docker build --no-cache=true -t shiying/keras:2.1 -f Dockerfile_keras .
+#docker build -t shiying/keras:2.2 -f Dockerfile_keras .
+#docker build --no-cache=true -t shiying/keras:2.2 -f Dockerfile_keras .
 #docker login --username=shiying
-#docker push shiying/keras:2.1
-#docker run -it --name=keras shiying/keras:2.1 bash
+#docker push shiying/keras:2.2
+#docker run -it --name=keras shiying/keras:2.2 bash
 #docker rm -f $(docker ps -a -q)
 #docker rm -f $(docker ps -a | grep none | awk '{print $1 }')
 #docker images|grep none|awk '{print $3 }'|xargs docker rmi -f
