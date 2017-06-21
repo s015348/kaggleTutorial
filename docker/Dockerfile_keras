@@ -8,7 +8,7 @@ MAINTAINER Ying <s015348@aliyun.com>
 # Ref: https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/8.0/devel/cudnn5/Dockerfile
 # cuda and cudnn are included in base image, but cudnn.h and libcudnn* are required for libgpuarray
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
 			curl git wget vim && \
 			CUDNN_TAR_FILE="cudnn-8.0-linux-x64-v5.1.tgz" && \
 			wget http://developer.download.nvidia.com/compute/redist/cudnn/v5.1/${CUDNN_TAR_FILE} && \
@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
 # Split into 3 layers for avoiding download failure
 # Layer ONE
 # Install utilities
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
             curl git wget vim \
             bzip2 unzip \
             build-essential \
@@ -47,7 +47,7 @@ RUN apt-get update && apt-get install -y \
 
 # Layer TWO
 # Order should be kept
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
             python-numpy \
             python-scipy \
             python-nose \
