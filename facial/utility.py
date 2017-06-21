@@ -138,7 +138,7 @@ def save_result(result):
     # confirm column types, and set Rowid as index
     result = result.merge(id_lookup_table, how='left', sort=False, 
                           on=['FeatureName','ImageId'])\
-                    .sort(["RowId"], ascending=True)\
+                    .sort_values(["RowId"], ascending=True)\
                     [['RowId', 'ImageId', 'FeatureName', 'Location']]\
                     .apply(lambda x:x.fillna(0))\
                     .set_index('RowId', inplace=False)
