@@ -46,14 +46,13 @@ def neuralnet2(input_shape):
     return neuralnet
 
 
-# if KERAS_BACKEND == 'th':
-#     input_shape = (1, (IMAGE_SIZE, IMAGE_SIZE))
-# elif KERAS_BACKEND == 'tf':
-#     input_shape = (IMAGE_SIZE, (IMAGE_SIZE, 1))
-# else:
-#     print("ERROR: please check constant KERAS_BACKEND which should be either th or tf")
+if KERAS_BACKEND == 'th':
+    input_shape = (1, IMAGE_SIZE, IMAGE_SIZE)
+elif KERAS_BACKEND == 'tf':
+    input_shape = (IMAGE_SIZE, IMAGE_SIZE, 1)
+else:
+    print("ERROR: please check constant KERAS_BACKEND which should be either th or tf")
 
-input_shape = (IMAGE_SIZE, IMAGE_SIZE, 1)
 NeuralNet1 = neuralnet1(IMAGE_SIZE ** 2)
 NeuralNet2 = neuralnet2(input_shape)
 
@@ -106,5 +105,5 @@ def reshape_data(train, test, image_size):
     return train, test
 
 
-plot_neural_net(NeuralNet1, filename='net-visualzation_1.png')
-plot_neural_net(NeuralNet2, filename='net-visualzation_2.png')
+# plot_neural_net(NeuralNet1, filename='net-visualzation_1.png')
+# plot_neural_net(NeuralNet2, filename='net-visualzation_2.png')
