@@ -4,7 +4,7 @@ import pandas as pd
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Activation, Convolution2D, MaxPooling2D, Flatten
 from keras.optimizers import SGD
-from keras.utils.visualize_util import plot
+from keras.utils.vis_utils import plot_model as plot
 from constants import KERAS_BACKEND, IMAGE_SIZE
 from utility import append_result
 
