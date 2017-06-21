@@ -47,9 +47,9 @@ def neuralnet2(input_shape):
 
 
 if KERAS_BACKEND == 'th':
-    input_shape = (1, IMAGE_SIZE, IMAGE_SIZE)
+    input_shape = (1, (IMAGE_SIZE, IMAGE_SIZE))
 elif KERAS_BACKEND == 'tf':
-    input_shape = (IMAGE_SIZE, IMAGE_SIZE, 1)
+    input_shape = (IMAGE_SIZE, (IMAGE_SIZE, 1))
 else:
     print("ERROR: please check constant KERAS_BACKEND which should be either th or tf")
 NeuralNet1 = neuralnet1(IMAGE_SIZE ** 2)
