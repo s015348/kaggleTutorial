@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 			tar -xzvf ${CUDNN_TAR_FILE} && \
 			cp -P cuda/include/cudnn.h /usr/local/cuda/include/cudnn.h && \
 			cp -P cuda/lib64/libcudnn* /usr/local/cuda/lib64/ && \
+			rm -f ${CUDNN_TAR_FILE} && \
+			rm -rf /var/lib/apt/lists/* && \
 			ldconfig
 
 
