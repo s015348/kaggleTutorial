@@ -57,9 +57,6 @@ input_shape = (IMAGE_SIZE, IMAGE_SIZE, 1)
 NeuralNet1 = neuralnet1(IMAGE_SIZE ** 2)
 NeuralNet2 = neuralnet2(input_shape)
 
-plot_neural_net(NeuralNet1, filename='net-visualzation.png')
-plot_neural_net(NeuralNet2, filename='net-visualzation.png')
-
 
 def convert_to_submission_format(features, predict):
     row_num = predict.shape[0]
@@ -107,3 +104,7 @@ def reshape_data(train, test, image_size):
     else:
         print("ERROR: please check constant KERAS_BACKEND which should be either th or tf")
     return train, test
+
+
+plot_neural_net(NeuralNet1, filename='net-visualzation_1.png')
+plot_neural_net(NeuralNet2, filename='net-visualzation_2.png')
