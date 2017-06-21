@@ -57,8 +57,8 @@ input_shape = (IMAGE_SIZE, IMAGE_SIZE, 1)
 NeuralNet1 = neuralnet1(IMAGE_SIZE ** 2)
 NeuralNet2 = neuralnet2(input_shape)
 
-plot_neural_net(NeuralNet1, filename='net-visualzation.png'):
-plot_neural_net(NeuralNet2, filename='net-visualzation.png'):
+plot_neural_net(NeuralNet1, filename='net-visualzation.png')
+plot_neural_net(NeuralNet2, filename='net-visualzation.png')
 
 
 def convert_to_submission_format(features, predict):
