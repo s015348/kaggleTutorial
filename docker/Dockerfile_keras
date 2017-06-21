@@ -13,8 +13,14 @@ ENV CUDNN_VERSION 6.0.21
 LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-            libcudnn6=$CUDNN_VERSION-1+cuda8.0 && \
-    rm -rf /var/lib/apt/lists/*
+			curl git wget vim \
+			libcudnn6=$CUDNN_VERSION-1+cuda8.0 && \
+			rm -rf /var/lib/apt/lists/* && \
+			CUDNN_TAR_FILE="cudnn-8.0-linux-x64-v6.0.tgz" && \
+			wget http://developer.download.nvidia.com/compute/redist/cudnn/v6.0/${CUDNN_TAR_FILE} && \
+			tar -xzvf ${CUDNN_TAR_FILE} && \
+			cp -P cuda/include/cudnn.h /usr/local/cuda/include/cudnn.h && \
+			cp -P cuda/lib64/libcudnn* /usr/local/cuda/lib64/
 
 
 ################ Install Anaconda ################
@@ -56,17 +62,19 @@ ENV PATH "/root/anaconda2/bin:$PATH"
 
 
 ################ Install Theano and Keras ################
-# Install theano
+# Install theano 
+# (must use upgrade because conda install 0.9, imcompatible with cuda)
 RUN conda install numpy scipy mkl nose sphinx pydot-ng && \
-	conda install theano
+	pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git && \
+	pip install --upgrade six
 
 # Install tensorflow
 RUN conda install tensorflow
 
 # Install keras, lasagne and nolearn
 RUN pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip && \
-    pip install nolearn && \
-    conda install keras
+	pip install nolearn && \
+	conda install keras
 
 # Set backend of keras as theano
 RUN mkdir ~/.keras && echo '{\n\
@@ -97,11 +105,11 @@ include_path = /usr/local/cuda/include \n\
 
 
 # Docker commands
-#docker build -t shiying/keras:2.0 -f Dockerfile_keras .
-#docker build --no-cache=true -t shiying/keras:2.0 -f Dockerfile_keras .
+#docker build -t shiying/keras:2.1 -f Dockerfile_keras .
+#docker build --no-cache=true -t shiying/keras:2.1 -f Dockerfile_keras .
 #docker login --username=shiying
-#docker push shiying/keras:2.0
-#docker run -it --name=keras shiying/keras:2.0 bash
+#docker push shiying/keras:2.1
+#docker run -it --name=keras shiying/keras:2.1 bash
 #docker rm -f $(docker ps -a -q)
 #docker rm -f $(docker ps -a | grep none | awk '{print $1 }')
 #docker images|grep none|awk '{print $3 }'|xargs docker rmi -f
