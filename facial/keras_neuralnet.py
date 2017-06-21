@@ -19,10 +19,10 @@ def neuralnet1(imput_dim):
     return neuralnet
 
 
-def neuralnet2(input_shape):
+def neuralnet2():
     neuralnet = Sequential()
 
-    neuralnet.add(Convolution2D(32, (3, 3), input_shape=input_shape))
+    neuralnet.add(Convolution2D(32, (3, 3)))
     neuralnet.add(Activation('relu'))
     neuralnet.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -46,14 +46,14 @@ def neuralnet2(input_shape):
     return neuralnet
 
 
-if KERAS_BACKEND == 'th':
-    input_shape = (1, (IMAGE_SIZE, IMAGE_SIZE))
-elif KERAS_BACKEND == 'tf':
-    input_shape = (IMAGE_SIZE, (IMAGE_SIZE, 1))
-else:
-    print("ERROR: please check constant KERAS_BACKEND which should be either th or tf")
+# if KERAS_BACKEND == 'th':
+#     input_shape = (1, (IMAGE_SIZE, IMAGE_SIZE))
+# elif KERAS_BACKEND == 'tf':
+#     input_shape = (IMAGE_SIZE, (IMAGE_SIZE, 1))
+# else:
+#     print("ERROR: please check constant KERAS_BACKEND which should be either th or tf")
 NeuralNet1 = neuralnet1(IMAGE_SIZE ** 2)
-NeuralNet2 = neuralnet2(input_shape)
+NeuralNet2 = neuralnet2()
 
 
 def convert_to_submission_format(features, predict):
