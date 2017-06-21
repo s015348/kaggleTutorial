@@ -1,5 +1,5 @@
 # Start with Ubuntu 16.04 64bit
-FROM nvidia/cuda:8.0-devel-ubuntu16.04
+FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
 
 MAINTAINER Ying <s015348@aliyun.com>
 
@@ -7,16 +7,8 @@ MAINTAINER Ying <s015348@aliyun.com>
 ################ Install cudnn5 ################
 # ref: https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/8.0/devel/cudnn5/Dockerfile
 
-RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
-
-ENV CUDNN_VERSION 5.1.10
-LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-			curl git wget vim \
-            libcudnn5=$CUDNN_VERSION-1+cuda8.0 \
-            libcudnn5-dev=$CUDNN_VERSION-1+cuda8.0 && \
-			rm -rf /var/lib/apt/lists/* && \
+RUN apt-get update && apt-get install -y --no-install-recommends && \
+			curl git wget vim && \
 			CUDNN_TAR_FILE="cudnn-8.0-linux-x64-v5.1.tgz" && \
 			wget http://developer.download.nvidia.com/compute/redist/cudnn/v5.1/${CUDNN_TAR_FILE} && \
 			tar -xzvf ${CUDNN_TAR_FILE} && \
