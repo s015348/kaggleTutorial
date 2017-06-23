@@ -1,24 +1,7 @@
-# Start with Ubuntu 16.04 64bit
-FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
+# Start with cudnn5
+FROM shiying/cuda:8.0-cudnn5-devel-ubuntu16.04
 
 MAINTAINER Ying <s015348@aliyun.com>
-
-
-################ Install cudnn5 ################
-# Ref: https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/8.0/devel/cudnn5/Dockerfile
-# cuda and cudnn are included in base image, but cudnn.h and libcudnn* are required for libgpuarray
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-			curl git wget vim && \
-			CUDNN_TAR_FILE="cudnn-8.0-linux-x64-v5.1.tgz" && \
-			wget http://developer.download.nvidia.com/compute/redist/cudnn/v5.1/${CUDNN_TAR_FILE} && \
-			tar -xzvf ${CUDNN_TAR_FILE} && \
-			cp -P cuda/include/cudnn.h /usr/local/cuda/include/cudnn.h && \
-			cp -P cuda/lib64/libcudnn* /usr/local/cuda/lib64/ && \
-			rm -f ${CUDNN_TAR_FILE} && \
-			rm -rf /var/lib/apt/lists/* && \
-			ldconfig
-
 
 ################ Install Anaconda ################
 # Split into 3 layers for avoiding download failure
@@ -67,12 +50,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Layer THREE
 # Install Anaconda in silent mode
 RUN cd / && \
-	wget --progress=bar:force https://repo.continuum.io/archive/Anaconda2-4.4.0-Linux-x86_64.sh && \
-	md5sum Anaconda2-4.4.0-Linux-x86_64.sh && \
-	bash Anaconda2-4.4.0-Linux-x86_64.sh -b
+    wget --progress=bar:force https://repo.continuum.io/miniconda/Miniconda2-4.3.21-Linux-x86_64.sh && \
+    /bin/bash Miniconda2-4.3.21-Linux-x86_64.sh -b -p /opt/conda && \
+    rm Miniconda2-4.3.21-Linux-x86_64.sh
 
 # Add Anaconda into path
-ENV PATH "/root/anaconda2/bin:$PATH"
+ENV PATH "/opt/conda/bin:/root/anaconda2/bin:$PATH"
 
 
 ################ Install Theano and Keras ################
@@ -126,7 +109,7 @@ cnmem = 1 \n\
 
 
 # Docker commands
-#docker build -t shiying/keras:2.4 -f Dockerfile_keras .
+#docker build -t shiying/keras:2.4.1 -f Dockerfile_keras .
 #docker build --no-cache=true -t shiying/keras:2.4 -f Dockerfile_keras .
 #docker login --username=shiying
 #docker push shiying/keras:2.4

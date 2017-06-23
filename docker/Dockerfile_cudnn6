@@ -1,0 +1,32 @@
+# Start with Nvidia official image
+FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04
+
+MAINTAINER Ying <s015348@aliyun.com>
+
+
+################ Install cudnn5 ################
+# ref: https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/8.0/runtime/cudnn6/Dockerfile
+# cuda and cudnn are included in base image, but cudnn.h and libcudnn* are required for libgpuarray
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+			curl git wget vim && \
+			CUDNN_TAR_FILE="cudnn-8.0-linux-x64-v6.0.tgz" && \
+			wget http://developer.download.nvidia.com/compute/redist/cudnn/v6.0/${CUDNN_TAR_FILE} && \
+			tar -xzvf ${CUDNN_TAR_FILE} && \
+			cp -P cuda/include/cudnn.h /usr/local/cuda/include/cudnn.h && \
+			cp -P cuda/lib64/libcudnn* /usr/local/cuda/lib64/ && \
+			rm -f ${CUDNN_TAR_FILE} && \
+			rm -rf cuda && \
+			rm -rf /var/lib/apt/lists/* && \
+			ldconfig
+
+
+# Docker commands
+#docker build -t shiying/cuda:8.0-cudnn6-devel-ubuntu16.04 -f Dockerfile_cudnn6 .
+#docker build --no-cache=true -t shiying/cuda:8.0-cudnn6-devel-ubuntu16.04 -f Dockerfile_cudnn6 .
+#docker login --username=shiying
+#docker push shiying/cuda:8.0-cudnn6-devel-ubuntu16.04
+#nvidia-docker run -it --name=tf shiying/cuda:8.0-cudnn6-devel-ubuntu16.04 bash
+#docker rm -f $(docker ps -a -q)
+#docker rm -f $(docker ps -a | grep none | awk '{print $1 }')
+#docker images|grep none|awk '{print $3 }'|xargs docker rmi -f

@@ -1,4 +1,5 @@
-FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04
+# Start with cudnn6
+FROM shiying/cuda:8.0-cudnn6-devel-ubuntu16.04
 
 MAINTAINER Ying <s015348@aliyun.com>
 
@@ -33,13 +34,16 @@ RUN pip --no-cache-dir install \
 		Pillow
 
 ################ Install TensorFlow GPU version ################
-RUN pip --no-cache-dir install tensorflow-gpu==1.1.0
+RUN pip --no-cache-dir install tensorflow-gpu==1.1.0 && \
+	cd /usr/local/cuda/lib64 && \
+	ln -s libcudnn.so.6.* libcudnn.so.5 && \
+	cd /
 
 # Install tensorlayer
 RUN pip --no-cache-dir install tensorlayer==1.5.1
 
 # For CUDA profiling, TensorFlow requires CUPTI.
-ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 
 
 
