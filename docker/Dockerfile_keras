@@ -58,7 +58,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
             python-sklearn \
             python-sympy \
             && \
-	pip install --upgrade pip setuptools && \
+    pip install --upgrade pip setuptools && \
     pip install kaggle-cli && \
 	apt-get clean && \
 	apt-get autoremove && \
@@ -67,7 +67,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Layer THREE
 # Install Anaconda in silent mode
 RUN cd / && \
-	wget https://repo.continuum.io/archive/Anaconda2-4.4.0-Linux-x86_64.sh && \
+	wget --progress=bar:force https://repo.continuum.io/archive/Anaconda2-4.4.0-Linux-x86_64.sh && \
 	md5sum Anaconda2-4.4.0-Linux-x86_64.sh && \
 	bash Anaconda2-4.4.0-Linux-x86_64.sh -b
 
