@@ -1,0 +1,28 @@
+# IMAGE ID: 85c8f551e1d2
+FROM tensorflow/tensorflow:latest-gpu
+
+MAINTAINER Tian YANG <yangtian@tsinghua.org.cn>
+
+
+RUN pip --no-cache-dir install \
+        nose        \
+        pyyaml      \
+        h5py        \
+        pydot       \
+        theano      \
+        keras
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        wget        \
+        git         \
+        graphviz    \
+        libhdf5-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR "/root"
+
+RUN git clone https://github.com/fchollet/keras.git
+
+
+# docker build -t shiying/tensorflow_keras:0.1 -f Dockerfile_tensorflow_keras .
+# nvidia-docker run -it --name=tk shiying/tensorflow_keras:0.1 bash
