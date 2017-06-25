@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
 		pkg-config \
 		python \
 		python-dev \
+		python-tk \
 		rsync \
 		software-properties-common \
 		unzip \
@@ -48,11 +49,11 @@ ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:$LD
 
 
 # Docker commands
-#docker build -t shiying/tensorflow:1.0 -f Dockerfile_tensorflow .
-#docker build --no-cache=true -t shiying/tensorflow:1.0 -f Dockerfile_tensorflow .
+#docker build -t shiying/tensorflow:1.1 -f Dockerfile_tensorflow .
+#docker build --no-cache=true -t shiying/tensorflow:1.1 -f Dockerfile_tensorflow .
 #docker login --username=shiying
-#docker push shiying/tensorflow:1.0
-#nvidia-docker run -it --name=tf shiying/tensorflow:1.0 bash
+#docker push shiying/tensorflow:1.1
+#nvidia-docker run -it --name=tf shiying/tensorflow:1.1 bash
 #docker rm -f $(docker ps -a -q)
 #docker rm -f $(docker ps -a | grep none | awk '{print $1 }')
 #docker images|grep none|awk '{print $3 }'|xargs docker rmi -f
