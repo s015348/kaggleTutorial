@@ -1,24 +1,25 @@
-# Start with cudnn6
-FROM shiying/cuda:8.0-cudnn6-devel-ubuntu16.04
+
+# Start with cudnn5
+FROM shiying/cuda:8.0-cudnn5-devel-ubuntu16.04
 
 MAINTAINER Ying <s015348@aliyun.com>
 
 ################ Install Utilities ################
 RUN apt-get update && apt-get install -y \
-		--no-install-recommends \
-		build-essential \
-		curl \
-		libfreetype6-dev \
-		libpng12-dev \
-		libzmq3-dev \
-		pkg-config \
-		python \
-		python-dev \
-		python-tk \
-		rsync \
-		software-properties-common \
-		unzip \
-		&& \
+                --no-install-recommends \
+                build-essential \
+                curl \
+                libfreetype6-dev \
+                libpng12-dev \
+                libzmq3-dev \
+                pkg-config \
+                python \
+                python-dev \
+                python-tk \
+                rsync \
+                software-properties-common \
+                unzip \
+                && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -27,21 +28,21 @@ RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
     rm get-pip.py
 
 RUN pip --no-cache-dir install \
-		matplotlib \
-		numpy \
-		scipy \
-		sklearn \
-		pandas \
-		Pillow
+                matplotlib \
+                numpy \
+                scipy \
+                sklearn \
+                pandas \
+                Pillow
 
 ################ Install TensorFlow GPU version ################
-RUN pip --no-cache-dir install tensorflow-gpu==1.1.0 && \
-	cd /usr/local/cuda/lib64 && \
-	ln -s libcudnn.so.6.* libcudnn.so.5 && \
-	cd /
+RUN pip --no-cache-dir install tensorflow-gpu==1.2.0
 
 # Install tensorlayer
 RUN pip --no-cache-dir install tensorlayer==1.5.1
+
+# Install benchmark
+RUN cd / && git clone https://github.com/tensorflow/benchmarks
 
 # For CUDA profiling, TensorFlow requires CUPTI.
 ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
@@ -49,11 +50,11 @@ ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:$LD
 
 
 # Docker commands
-#docker build -t shiying/tensorflow:1.1 -f Dockerfile_tensorflow .
-#docker build --no-cache=true -t shiying/tensorflow:1.1 -f Dockerfile_tensorflow .
+#docker build -t shiying/tensorflow:1.2 -f Dockerfile_tensorflow .
+#docker build --no-cache=true -t shiying/tensorflow:1.2 -f Dockerfile_tensorflow .
 #docker login --username=shiying
-#docker push shiying/tensorflow:1.1
-#nvidia-docker run -it --name=tf shiying/tensorflow:1.1 bash
+#docker push shiying/tensorflow:1.2
+#nvidia-docker run -it --name=tf shiying/tensorflow:1.2 bash
 #docker rm -f $(docker ps -a -q)
 #docker rm -f $(docker ps -a | grep none | awk '{print $1 }')
 #docker images|grep none|awk '{print $3 }'|xargs docker rmi -f
