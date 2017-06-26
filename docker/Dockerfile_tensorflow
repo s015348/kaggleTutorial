@@ -8,7 +8,8 @@ MAINTAINER Ying <s015348@aliyun.com>
 RUN apt-get update && apt-get install -y \
                 --no-install-recommends \
                 build-essential \
-                curl \
+                cmake \
+                swig \
                 libfreetype6-dev \
                 libpng12-dev \
                 libzmq3-dev \
@@ -21,6 +22,7 @@ RUN apt-get update && apt-get install -y \
                 unzip \
                 && \
     apt-get clean && \
+    apt-get autoremove && \
     rm -rf /var/lib/apt/lists/*
 
 RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
@@ -33,7 +35,8 @@ RUN pip --no-cache-dir install \
                 scipy \
                 sklearn \
                 pandas \
-                Pillow
+                Pillow \
+                gym[all]
 
 ################ Install TensorFlow GPU version ################
 RUN pip --no-cache-dir install tensorflow-gpu==1.2.0
@@ -41,8 +44,10 @@ RUN pip --no-cache-dir install tensorflow-gpu==1.2.0
 # Install tensorlayer
 RUN pip --no-cache-dir install tensorlayer==1.5.1
 
-# Install benchmark
-RUN cd / && git clone https://github.com/tensorflow/benchmarks
+# Install benchmark and tensorlayer examples
+RUN cd / && \
+		git clone https://github.com/tensorflow/benchmarks && \
+		git clone https://github.com/zsdonghao/tensorlayer.git
 
 # For CUDA profiling, TensorFlow requires CUPTI.
 ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
