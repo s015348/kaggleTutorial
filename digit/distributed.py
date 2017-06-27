@@ -22,11 +22,22 @@ import sys
 import time
 
 # cluster specification
+master_nodes = ["localhost:2220"]
 parameter_servers = ["localhost:2222"]
 workers = [ "localhost:2223", 
       "localhost:2224",
       "localhost:2225"]
-cluster = tf.train.ClusterSpec({"ps":parameter_servers, "worker":workers})
+cluster = tf.train.ClusterSpec({"master":master_nodes, "ps":parameter_servers, "worker":workers})
+"""
+someone said below config works:
+ TF_CONFIG = { 
+        'cluster' : { 
+            'master' : [ master_node01:2222 ],
+            'ps' : [ps_node01:2222, ...]
+            'worker' : [worker_node01:2222, ...]}
+        'environment' : 'cloud',
+        'task': {'type': current_task, 'index': current_index}}
+"""
 print("Configured cluster specification with server: %s, worker: %s" % (parameter_servers, workers))
 
 # input flags
