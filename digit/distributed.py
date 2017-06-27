@@ -2,13 +2,13 @@
 FROM: http://ischlag.github.io/2016/06/12/async-distributed-tensorflow/
 
 Distributed Tensorflow example of using data parallelism and share model parameters.
-Trains a simple sigmoid neural network on mnist for 20 epochs on three machines using one parameter server. 
+Trains a simple sigmoid neural network on mnist for 20 epochs on three machines using one parameter server.
 
-Change the hardcoded host urls below with your own hosts. 
-Run like this: 
+Change the hardcoded host urls below with your own hosts.
+Run like this:
 
 pc-01$ python example.py --job_name="ps" --task_index=0 &
-pc-02$ python example.py --job_name="worker" --task_index=0 & 
+pc-02$ python example.py --job_name="worker" --task_index=0 &
 pc-03$ python example.py --job_name="worker" --task_index=1 &
 pc-04$ python example.py --job_name="worker" --task_index=2 &
 
@@ -23,7 +23,7 @@ import time
 
 # cluster specification
 parameter_servers = ["localhost:2222"]
-workers = [ "localhost:2223", 
+workers = [ "localhost:2223",
       "localhost:2224",
       "localhost:2225"]
 cluster = tf.train.ClusterSpec({"ps":parameter_servers, "worker":workers})
@@ -36,7 +36,7 @@ FLAGS = tf.app.flags.FLAGS
 
 # start a server for a specific task
 print("Starting server with job %s, task #%d" % (FLAGS.job_name, FLAGS.task_index))
-server = tf.train.Server(cluster, 
+server = tf.train.Server(cluster,
                           job_name=FLAGS.job_name,
                           task_index=FLAGS.task_index)
 print("Started")
@@ -63,8 +63,8 @@ elif FLAGS.job_name == "worker":
     cluster=cluster)):
 
     # count the number of updates
-    global_step = tf.get_variable('global_step', [], 
-                                initializer = tf.constant_initializer(0), 
+    global_step = tf.get_variable('global_step', [],
+                                initializer = tf.constant_initializer(0),
                                 trainable = False)
 
     # input images
@@ -103,16 +103,16 @@ elif FLAGS.job_name == "worker":
       # optimizer is an "operation" which we can execute in a session
       grad_op = tf.train.GradientDescentOptimizer(learning_rate)
       '''
-      rep_op = tf.train.SyncReplicasOptimizer(grad_op, 
+      rep_op = tf.train.SyncReplicasOptimizer(grad_op,
                                           replicas_to_aggregate=len(workers),
-                                          replica_id=FLAGS.task_index, 
+                                          replica_id=FLAGS.task_index,
                                           total_num_replicas=len(workers),
                                           use_locking=True
                                           )
       train_op = rep_op.minimize(cross_entropy, global_step=global_step)
       '''
       train_op = grad_op.minimize(cross_entropy, global_step=global_step)
-      
+
     '''
     init_token_op = rep_op.get_init_tokens_op()
     chief_queue_runner = rep_op.get_chief_queue_runner()
@@ -127,7 +127,7 @@ elif FLAGS.job_name == "worker":
     tf.summary.scalar("cost", cross_entropy)
     tf.summary.scalar("accuracy", accuracy)
 
-    # merge all summaries into a single "operation" which we can execute in a session 
+    # merge all summaries into a single "operation" which we can execute in a session
     summary_op = tf.summary.merge_all()
     init_op = tf.initialize_all_variables()
     print("Variables initialized ...")
@@ -138,7 +138,11 @@ elif FLAGS.job_name == "worker":
 
   begin_time = time.time()
   frequency = 100
-  with sv.prepare_or_wait_for_session(server.target) as sess:
+  config = tf.ConfigProto(
+        allow_soft_placement=True,
+        log_device_placement=False,
+        device_filters=["/job:ps", "/job:worker/task:%d" % FLAGS.task_index])
+  with sv.prepare_or_wait_for_session(server.target, config=config) as sess:
     '''
     # is chief
     if FLAGS.task_index == 0:
@@ -147,7 +151,7 @@ elif FLAGS.job_name == "worker":
     '''
     # create log writer object (this will log on every machine)
     writer = tf.train.SummaryWriter(logs_path, graph=tf.get_default_graph())
-        
+
     # perform training cycles
     start_time = time.time()
     for epoch in range(training_epochs):
@@ -158,10 +162,10 @@ elif FLAGS.job_name == "worker":
       count = 0
       for i in range(batch_count):
         batch_x, batch_y = mnist.train.next_batch(batch_size)
-        
+
         # perform the operations we defined earlier on batch
         _, cost, summary, step = sess.run(
-                        [train_op, cross_entropy, summary_op, global_step], 
+                        [train_op, cross_entropy, summary_op, global_step],
                         feed_dict={x: batch_x, y_: batch_y})
         writer.add_summary(summary, step)
 
@@ -169,10 +173,10 @@ elif FLAGS.job_name == "worker":
         if count % frequency == 0 or i+1 == batch_count:
           elapsed_time = time.time() - start_time
           start_time = time.time()
-          print("Step: %d," % (step+1), 
-                " Epoch: %2d," % (epoch+1), 
-                " Batch: %3d of %3d," % (i+1, batch_count), 
-                " Cost: %.4f," % cost, 
+          print("Step: %d," % (step+1),
+                " Epoch: %2d," % (epoch+1),
+                " Batch: %3d of %3d," % (i+1, batch_count),
+                " Cost: %.4f," % cost,
                 " AvgTime: %3.2fms" % float(elapsed_time*1000/frequency))
           count = 0
 
