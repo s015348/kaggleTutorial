@@ -30,8 +30,8 @@ workers = [ "localhost:2223",
 cluster = tf.train.ClusterSpec({"master":master_nodes, "ps":parameter_servers, "worker":workers})
 """
 someone said below config works:
- TF_CONFIG = { 
-        'cluster' : { 
+ TF_CONFIG = {
+        'cluster' : {
             'master' : [ master_node01:2222 ],
             'ps' : [ps_node01:2222, ...]
             'worker' : [worker_node01:2222, ...]}
@@ -161,7 +161,7 @@ elif FLAGS.job_name == "worker":
       sess.run(init_token_op)
     '''
     # create log writer object (this will log on every machine)
-    writer = tf.train.SummaryWriter(logs_path, graph=tf.get_default_graph())
+    writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 
     # perform training cycles
     start_time = time.time()
